@@ -1,11 +1,11 @@
 #include "RaceEntry.h"
 
 RaceEntry::RaceEntry()
-    : driver(), car(), strategy(), currentLap(0), totalTime(0.0), position(0), inPit(false) {
+    : driver(), car(), strategy(), currentLap(0), totalTime(0.0), position(0), inPit(false), lastEvent("") {
 }
 
 RaceEntry::RaceEntry(const Driver& driver, const F1Car& car, const Strategy& strategy)
-    : driver(driver), car(car), strategy(strategy), currentLap(0), totalTime(0.0), position(0), inPit(false) {
+    : driver(driver), car(car), strategy(strategy), currentLap(0), totalTime(0.0), position(0), inPit(false), lastEvent("") {
 }
 
 const Driver& RaceEntry::getDriver() const {
@@ -44,6 +44,10 @@ bool RaceEntry::isInPit() const {
     return inPit;
 }
 
+std::string RaceEntry::getLastEvent() const {
+    return lastEvent;
+}
+
 void RaceEntry::setPosition(int position) {
     this->position = position;
 }
@@ -58,4 +62,12 @@ void RaceEntry::addTime(double lapTime) {
 
 void RaceEntry::setPitState(bool state) {
     inPit = state;
+}
+
+void RaceEntry::setLastEvent(const std::string& event) {
+    lastEvent = event;
+}
+
+void RaceEntry::clearLastEvent() {
+    lastEvent.clear();
 }

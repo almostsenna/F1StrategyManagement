@@ -1,6 +1,7 @@
 #include "GameController.h"
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 GameController::GameController() : race() {}
 
@@ -41,18 +42,59 @@ void GameController::simulateOneLap() {
 }
 
 void GameController::printStandings() const {
-    std::cout << "\n========================================\n";
-    std::cout << "Lap " << race.getCurrentLap() << " / " << race.getTrack().getLaps() << "\n";
-    std::cout << "Track: " << race.getTrack().getName() << "\n";
-    std::cout << "========================================\n";
+    std::cout << "\n====================================================================================================\n";
+    std::cout << "Lap " << race.getCurrentLap() << " / " << race.getTrack().getLaps()
+        << " | Track: " << race.getTrack().getName() << "\n";
+    std::cout << "====================================================================================================\n";
 
-    for (const auto& entry : race.getParticipants()) {
-        std::cout << entry.getPosition() << ". "
-            << std::setw(12) << std::left << entry.getDriver().getName()
-            << " | Time: " << std::fixed << std::setprecision(2) << entry.getTotalTime()
-            << " | Tyre: " << entry.getCar().getTyre().getCompoundName()
-            << " | Wear: " << entry.getCar().getTyre().getWear()
-            << "% | Fuel: " << entry.getCar().getFuel()
+    const auto& participants = race.getParticipants();
+
+    if (participants.empty()) {
+        std::cout << "No participants in race.\n";
+        return;
+    }
+
+    double leaderTime = participants.front().getTotalTime();
+
+    std::cout << std::left
+        << std::setw(4) << "Pos"
+        << std::setw(14) << "Driver"
+        << std::setw(10) << "Gap"
+        << std::setw(10) << "Mode"
+        << std::setw(10) << "Tyre"
+        << std::setw(10) << "Wear%"
+        << std::setw(10) << "TempC"
+        << std::setw(10) << "Fuel"
+        << std::setw(10) << "Event"
+        << "\n";
+
+    std::cout << "----------------------------------------------------------------------------------------------------\n";
+
+    for (size_t i = 0; i < participants.size(); i++) {
+        const auto& entry = participants[i];
+
+        std::string gapText = (i == 0) ? "Leader"
+            : "+" + std::to_string(entry.getTotalTime() - leaderTime);
+
+        if (i != 0) {
+            double gap = entry.getTotalTime() - leaderTime;
+            std::ostringstream oss;
+            oss << "+" << std::fixed << std::setprecision(2) << gap;
+            gapText = oss.str();
+        }
+
+        std::cout << std::left
+            << std::setw(4) << entry.getPosition()
+            << std::setw(14) << entry.getDriver().getName()
+            << std::setw(10) << gapText
+            << std::setw(10) << entry.getStrategy().getModeName()
+            << std::setw(10) << entry.getCar().getTyre().getCompoundName();
+
+        std::cout << std::fixed << std::setprecision(2)
+            << std::setw(10) << entry.getCar().getTyre().getWear()
+            << std::setw(10) << entry.getCar().getTyre().getTemperature()
+            << std::setw(10) << entry.getCar().getFuel()
+            << std::setw(10) << (entry.getLastEvent().empty() ? "-" : entry.getLastEvent())
             << "\n";
     }
 }

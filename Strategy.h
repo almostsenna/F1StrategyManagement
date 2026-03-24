@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 enum class RaceMode {
     Push,
@@ -23,4 +24,5 @@ public:
 
     double getPaceModifier() const;
     double getWearModifier() const;
+    std::string getModeName() const;
 };

@@ -59,6 +59,7 @@ double Race::calculateLapTime(RaceEntry& entry) {
 void Race::processPitStop(RaceEntry& entry) {
     entry.setPitState(true);
     entry.addTime(22.0);
+    entry.setLastEvent("PIT");
 
     TyreCompound nextCompound = TyreCompound::Hard;
 
@@ -79,6 +80,8 @@ void Race::simulateLap() {
     currentLap++;
 
     for (auto& entry : participants) {
+        entry.clearLastEvent();
+
         double lapTime = calculateLapTime(entry);
         entry.addTime(lapTime);
         entry.addLap();

@@ -1,5 +1,5 @@
 #pragma once
-#pragma once
+#include <string>
 #include "Driver.h"
 #include "F1Car.h"
 #include "Strategy.h"
@@ -13,6 +13,7 @@ private:
     double totalTime;
     int position;
     bool inPit;
+    std::string lastEvent;
 
 public:
     RaceEntry();
@@ -28,9 +29,13 @@ public:
     double getTotalTime() const;
     int getPosition() const;
     bool isInPit() const;
+    std::string getLastEvent() const;
 
     void setPosition(int position);
     void addLap();
     void addTime(double lapTime);
     void setPitState(bool state);
+
+    void setLastEvent(const std::string& event);
+    void clearLastEvent();
 };

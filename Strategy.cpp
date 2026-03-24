@@ -39,3 +39,12 @@ double Strategy::getWearModifier() const {
     default: return 1.0;
     }
 }
+
+std::string Strategy::getModeName() const {
+    switch (mode) {
+    case RaceMode::Push: return "Push";
+    case RaceMode::Normal: return "Normal";
+    case RaceMode::Conserve: return "Conserve";
+    default: return "Unknown";
+    }
+}

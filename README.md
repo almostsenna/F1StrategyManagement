@@ -1,0 +1,19 @@
+# Formula 1 Race Strategy Simulator
+
+## Versions
+
+### v0.1 — Core Simulation
+- lap-by-lap race simulation
+- lap time calculation
+- tyre wear system
+- fuel consumption
+- pit stop logic
+- position calculation
+- basic console output
+
+### v0.2 — Readable Simulation
+- gap to leader
+- race mode display
+- tyre temperature output
+- pit stop events
+- improved console formatting

@@ -1,9 +1,11 @@
 #include "Strategy.h"
 
-Strategy::Strategy() : mode(RaceMode::Normal), plannedPitLap(5) {}
+Strategy::Strategy()
+    : mode(RaceMode::Normal), plannedPitLap(5), nextPitCompound(TyreCompound::Hard) {
+}
 
-Strategy::Strategy(RaceMode mode, int plannedPitLap)
-    : mode(mode), plannedPitLap(plannedPitLap) {
+Strategy::Strategy(RaceMode mode, int plannedPitLap, TyreCompound nextPitCompound)
+    : mode(mode), plannedPitLap(plannedPitLap), nextPitCompound(nextPitCompound) {
 }
 
 RaceMode Strategy::getMode() const {
@@ -14,8 +16,16 @@ int Strategy::getPlannedPitLap() const {
     return plannedPitLap;
 }
 
+TyreCompound Strategy::getNextPitCompound() const {
+    return nextPitCompound;
+}
+
 void Strategy::setMode(RaceMode mode) {
     this->mode = mode;
+}
+
+void Strategy::setNextPitCompound(TyreCompound compound) {
+    nextPitCompound = compound;
 }
 
 bool Strategy::shouldPit(int currentLap, double tyreWear) const {

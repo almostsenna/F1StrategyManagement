@@ -6,7 +6,7 @@
 GameController::GameController() : race() {}
 
 void GameController::setupTestRace() {
-    Track track("Silverstone", 5.891, 10, 1.2, 90.0);
+    Track track("Silverstone", 5.891, 10, 1.2, 90.0, 1.1, 1.0, 32.0);
     race = Race(track);
 
     Driver verstappen("Verstappen", 96, 94, 88);
@@ -23,13 +23,14 @@ void GameController::setupTestRace() {
     F1Car mclarenCar("McLaren", mercedesPU, Tyre(TyreCompound::Medium), 798.0, 100.0);
     F1Car mercCar("Mercedes", mercedesPU, Tyre(TyreCompound::Medium), 798.0, 100.0);
 
-    Strategy pushStrategy(RaceMode::Push, 4);
-    Strategy normalStrategy(RaceMode::Normal, 5);
-    Strategy conserveStrategy(RaceMode::Conserve, 6);
+    Strategy pushStrategy(RaceMode::Push, 4, TyreCompound::Medium);
+    Strategy normalStrategy(RaceMode::Normal, 5, TyreCompound::Hard);
+    Strategy normalStrategy2(RaceMode::Normal, 5, TyreCompound::Hard);
+    Strategy conserveStrategy(RaceMode::Conserve, 6, TyreCompound::Hard);
 
     race.addParticipant(RaceEntry(verstappen, rbCar, pushStrategy));
     race.addParticipant(RaceEntry(leclerc, ferrariCar, normalStrategy));
-    race.addParticipant(RaceEntry(norris, mclarenCar, normalStrategy));
+    race.addParticipant(RaceEntry(norris, mclarenCar, normalStrategy2));
     race.addParticipant(RaceEntry(hamilton, mercCar, conserveStrategy));
 }
 

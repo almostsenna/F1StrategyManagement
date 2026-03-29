@@ -1,11 +1,32 @@
 #include "Track.h"
 
 Track::Track()
-    : name("Generic Track"), length(5.0), laps(10), tyreWearFactor(1.0), baseLapTime(90.0) {
+    : name("Generic Track"),
+    length(5.0),
+    laps(10),
+    tyreWearFactor(1.0),
+    baseLapTime(90.0),
+    powerSensitivity(1.0),
+    technicality(1.0),
+    trackTemperature(30.0) {
 }
 
-Track::Track(const std::string& name, double length, int laps, double tyreWearFactor, double baseLapTime)
-    : name(name), length(length), laps(laps), tyreWearFactor(tyreWearFactor), baseLapTime(baseLapTime) {
+Track::Track(const std::string& name,
+    double length,
+    int laps,
+    double tyreWearFactor,
+    double baseLapTime,
+    double powerSensitivity,
+    double technicality,
+    double trackTemperature)
+    : name(name),
+    length(length),
+    laps(laps),
+    tyreWearFactor(tyreWearFactor),
+    baseLapTime(baseLapTime),
+    powerSensitivity(powerSensitivity),
+    technicality(technicality),
+    trackTemperature(trackTemperature) {
 }
 
 std::string Track::getName() const {
@@ -26,4 +47,16 @@ double Track::getTyreWearFactor() const {
 
 double Track::getBaseLapTime() const {
     return baseLapTime;
+}
+
+double Track::getPowerSensitivity() const {
+    return powerSensitivity;
+}
+
+double Track::getTechnicality() const {
+    return technicality;
+}
+
+double Track::getTrackTemperature() const {
+    return trackTemperature;
 }

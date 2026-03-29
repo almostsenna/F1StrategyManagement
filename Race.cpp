@@ -28,29 +28,50 @@ double Race::calculateLapTime(RaceEntry& entry) {
 
     double lapTime = track.getBaseLapTime();
 
-    lapTime -= driver.getPaceBonus();
-    lapTime -= car.getEngine().getPowerBonus();
+    // Engine effect depends on track power sensitivity
+    lapTime -= car.getEngine().getPowerBonus() * track.getPowerSensitivity();
+
+    // Driver effect depends on track technicality
+    lapTime -= driver.getPaceBonus() * track.getTechnicality();
+
+    // Tyre grip bonus
     lapTime -= car.getTyre().getGripBonus();
+
+    // Extra wear penalty
+    lapTime += car.getTyre().getWear() * 0.03;
+
+    // Fuel penalty
     lapTime += car.getFuelPenalty();
+
+    // Strategy mode
     lapTime += strategy.getPaceModifier();
 
+    // Random variation
     int randomValue = std::rand() % 100;
     double randomFactor = (randomValue / 100.0) - 0.5;
     lapTime += randomFactor;
 
-    double wearAmount = track.getTyreWearFactor() * strategy.getWearModifier() * driver.getTyreWearModifier();
+    // Tyre wear update
+    double wearAmount = track.getTyreWearFactor()
+        * strategy.getWearModifier()
+        * driver.getTyreWearModifier();
+
     car.getTyreRef().increaseWear(wearAmount);
 
+    // Tyre temperature update
+    double baseTempEffect = (track.getTrackTemperature() - 30.0) * 0.1;
+
     if (strategy.getMode() == RaceMode::Push) {
-        car.getTyreRef().changeTemperature(3.0);
+        car.getTyreRef().changeTemperature(3.0 + baseTempEffect);
     }
     else if (strategy.getMode() == RaceMode::Conserve) {
-        car.getTyreRef().changeTemperature(-2.0);
+        car.getTyreRef().changeTemperature(-2.0 + baseTempEffect);
     }
     else {
-        car.getTyreRef().changeTemperature(1.0);
+        car.getTyreRef().changeTemperature(1.0 + baseTempEffect);
     }
 
+    // Fuel burn
     car.burnFuel(2.2);
 
     return lapTime;
@@ -58,17 +79,11 @@ double Race::calculateLapTime(RaceEntry& entry) {
 
 void Race::processPitStop(RaceEntry& entry) {
     entry.setPitState(true);
+    TyreCompound nextCompound = entry.getStrategy().getNextPitCompound();
+    std::string compoundName = Tyre(nextCompound).getCompoundName();
+
     entry.addTime(22.0);
-    entry.setLastEvent("PIT");
-
-    TyreCompound nextCompound = TyreCompound::Hard;
-
-    if (entry.getCar().getTyre().getCompound() == TyreCompound::Soft) {
-        nextCompound = TyreCompound::Medium;
-    }
-    else if (entry.getCar().getTyre().getCompound() == TyreCompound::Medium) {
-        nextCompound = TyreCompound::Hard;
-    }
+    entry.setLastEvent("PIT -> " + compoundName);
 
     entry.getCarRef().changeTyres(nextCompound);
     entry.setPitState(false);

@@ -17,3 +17,10 @@
 - tyre temperature output
 - pit stop events
 - improved console formatting
+
+### v0.3 — Improved Race Logic
+- added track-specific parameters
+- improved lap time calculation
+- added custom tyre compound selection after pit stop
+- improved pit stop event output
+- made race dynamics more realistic

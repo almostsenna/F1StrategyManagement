@@ -4,6 +4,18 @@
 class GameController {
 private:
     Race race;
+    Track chooseTrack() const;
+
+    Track createSilverstone() const;
+    Track createMonza() const;
+    Track createMonaco() const;
+    Track createSpa() const;
+    Track createSuzuka() const;
+    Track createBahrain() const;
+    Track createImola() const;
+    Track createRedBullRing() const;
+    Track createSingapore() const;
+    Track createInterlagos() const;
 
 public:
     GameController();

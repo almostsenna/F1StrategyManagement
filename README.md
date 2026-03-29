@@ -24,3 +24,9 @@
 - added custom tyre compound selection after pit stop
 - improved pit stop event output
 - made race dynamics more realistic
+
+### v0.4 — Multiple Tracks
+- added track selection menu
+- added 10 predefined tracks
+- each track has unique race parameters
+- tracks now affect power, technicality, tyre wear, and temperature behavior

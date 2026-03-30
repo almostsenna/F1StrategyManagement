@@ -30,3 +30,11 @@
 - added 10 predefined tracks
 - each track has unique race parameters
 - tracks now affect power, technicality, tyre wear, and temperature behavior
+
+### v0.5 — Interactive Strategy
+- added driver selection
+- added player-controlled strategy management
+- added live race mode switching
+- added manual pit stop requests
+- fixed player tracking after position changes
+- added stable [YOU] marker for selected driver

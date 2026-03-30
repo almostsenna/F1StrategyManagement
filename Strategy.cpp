@@ -1,11 +1,17 @@
 #include "Strategy.h"
 
 Strategy::Strategy()
-    : mode(RaceMode::Normal), plannedPitLap(5), nextPitCompound(TyreCompound::Hard) {
+    : mode(RaceMode::Normal),
+    plannedPitLap(5),
+    nextPitCompound(TyreCompound::Hard),
+    forcePitRequest(false) {
 }
 
 Strategy::Strategy(RaceMode mode, int plannedPitLap, TyreCompound nextPitCompound)
-    : mode(mode), plannedPitLap(plannedPitLap), nextPitCompound(nextPitCompound) {
+    : mode(mode),
+    plannedPitLap(plannedPitLap),
+    nextPitCompound(nextPitCompound),
+    forcePitRequest(false) {
 }
 
 RaceMode Strategy::getMode() const {
@@ -20,6 +26,10 @@ TyreCompound Strategy::getNextPitCompound() const {
     return nextPitCompound;
 }
 
+bool Strategy::hasForcedPitRequest() const {
+    return forcePitRequest;
+}
+
 void Strategy::setMode(RaceMode mode) {
     this->mode = mode;
 }
@@ -28,8 +38,16 @@ void Strategy::setNextPitCompound(TyreCompound compound) {
     nextPitCompound = compound;
 }
 
+void Strategy::requestPitStop() {
+    forcePitRequest = true;
+}
+
+void Strategy::clearPitRequest() {
+    forcePitRequest = false;
+}
+
 bool Strategy::shouldPit(int currentLap, double tyreWear) const {
-    return currentLap == plannedPitLap || tyreWear >= 70.0;
+    return forcePitRequest || currentLap == plannedPitLap || tyreWear >= 70.0;
 }
 
 double Strategy::getPaceModifier() const {

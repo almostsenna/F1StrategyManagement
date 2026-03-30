@@ -23,6 +23,9 @@ public:
     void updatePositions();
     void finishRace();
 
+
+    void setParticipantMode(int index, RaceMode mode);
+    void forcePitStop(int index, TyreCompound compound);
     bool isFinished() const;
     int getCurrentLap() const;
     const Track& getTrack() const;

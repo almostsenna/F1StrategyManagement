@@ -4,8 +4,11 @@
 class GameController {
 private:
     Race race;
-    Track chooseTrack() const;
+    std::string playerDriverName;
 
+    Track chooseTrack() const;
+    std::string chooseDriverName() const;
+    int findPlayerIndex() const;
     Track createSilverstone() const;
     Track createMonza() const;
     Track createMonaco() const;
@@ -16,6 +19,8 @@ private:
     Track createRedBullRing() const;
     Track createSingapore() const;
     Track createInterlagos() const;
+    void handlePlayerCommand();
+
 
 public:
     GameController();

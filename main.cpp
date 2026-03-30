@@ -11,8 +11,7 @@ int main() {
         controller.simulateOneLap();
         controller.printStandings();
 
-        std::cout << "\nPress Enter for next lap...";
-        std::cin.get();
+        
     }
 
     std::cout << "\nRace finished!\n";

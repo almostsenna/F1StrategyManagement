@@ -3,8 +3,8 @@
 #include <iomanip>
 #include <sstream>
 
-GameController::GameController() : race() {
-}
+GameController::GameController() : race(), playerDriverName("Verstappen") {}
+
 Track GameController::chooseTrack() const {
     int choice = 0;
 
@@ -38,6 +38,40 @@ Track GameController::chooseTrack() const {
         std::cout << "Invalid choice. Silverstone selected by default.\n";
         return createSilverstone();
     }
+}
+
+std::string  GameController::chooseDriverName() const {
+    int choice = 0;
+
+    std::cout << "\nChoose your driver:\n";
+    std::cout << "1. Verstappen\n";
+    std::cout << "2. Leclerc\n";
+    std::cout << "3. Norris\n";
+    std::cout << "4. Hamilton\n";
+    std::cout << "Enter choice: ";
+    std::cin >> choice;
+    std::cin.ignore();
+
+    switch (choice) {
+    case 1: return "Verstappen";
+    case 2: return "Leclerc";
+    case 3: return "Norris";
+    case 4: return "Hamilton";
+    default:
+        std::cout << "Invalid choice. Verstappen selected by default.\n";
+        return "Verstappen";
+    }
+}
+int GameController::findPlayerIndex() const {
+    const auto& participants = race.getParticipants();
+
+    for (size_t i = 0; i < participants.size(); i++) {
+        if (participants[i].getDriver().getName() == playerDriverName) {
+            return static_cast<int>(i);
+        }
+    }
+
+    return -1;
 }
 
 Track GameController::createSilverstone() const {
@@ -82,11 +116,14 @@ Track GameController::createInterlagos() const {
 
 void GameController::setupTestRace() {
     Track selectedTrack = chooseTrack();
+    playerDriverName = chooseDriverName();
 
     std::cout << "\nSelected track: " << selectedTrack.getName() << "\n";
     std::cout << "Power sensitivity: " << selectedTrack.getPowerSensitivity() << "\n";
     std::cout << "Technicality: " << selectedTrack.getTechnicality() << "\n";
     std::cout << "Track temperature: " << selectedTrack.getTrackTemperature() << " C\n\n";
+    std::cout << "Your driver: " << playerDriverName << "\n\n";
+
 
     race = Race(selectedTrack);
 
@@ -119,7 +156,56 @@ void GameController::start() {
     race.startRace();
 }
 
+void GameController::handlePlayerCommand() {
+    int playerIndex = findPlayerIndex();
+    const auto& participants = race.getParticipants();
+
+    if (playerIndex < 0 || playerIndex >= static_cast<int>(participants.size())) {
+        return;
+    }
+
+    std::cout << "\nYour driver: " << participants[playerIndex].getDriver().getName() << "\n";
+    std::cout << "Choose action:\n";
+    std::cout << "1. Push\n";
+    std::cout << "2. Normal\n";
+    std::cout << "3. Conserve\n";
+    std::cout << "4. Pit for Soft\n";
+    std::cout << "5. Pit for Medium\n";
+    std::cout << "6. Pit for Hard\n";
+    std::cout << "7. Continue\n";
+    std::cout << "Enter choice: ";
+
+    int choice = 0;
+    std::cin >> choice;
+    std::cin.ignore();
+
+    switch (choice) {
+    case 1:
+        race.setParticipantMode(playerIndex, RaceMode::Push);
+        break;
+    case 2:
+        race.setParticipantMode(playerIndex, RaceMode::Normal);
+        break;
+    case 3:
+        race.setParticipantMode(playerIndex, RaceMode::Conserve);
+        break;
+    case 4:
+        race.forcePitStop(playerIndex, TyreCompound::Soft);
+        break;
+    case 5:
+        race.forcePitStop(playerIndex, TyreCompound::Medium);
+        break;
+    case 6:
+        race.forcePitStop(playerIndex, TyreCompound::Hard);
+        break;
+    case 7:
+    default:
+        break;
+    }
+}
+
 void GameController::simulateOneLap() {
+    handlePlayerCommand();
     race.simulateLap();
 }
 
@@ -140,14 +226,14 @@ void GameController::printStandings() const {
 
     std::cout << std::left
         << std::setw(4) << "Pos"
-        << std::setw(14) << "Driver"
+        << std::setw(20) << "Driver"
         << std::setw(10) << "Gap"
         << std::setw(10) << "Mode"
         << std::setw(10) << "Tyre"
         << std::setw(10) << "Wear%"
         << std::setw(10) << "TempC"
         << std::setw(10) << "Fuel"
-        << std::setw(10) << "Event"
+        << std::setw(14) << "Event"
         << "\n";
 
     std::cout << "----------------------------------------------------------------------------------------------------\n";
@@ -155,9 +241,12 @@ void GameController::printStandings() const {
     for (size_t i = 0; i < participants.size(); i++) {
         const auto& entry = participants[i];
 
-        std::string gapText = (i == 0) ? "Leader"
-            : "+" + std::to_string(entry.getTotalTime() - leaderTime);
+        std::string driverName = entry.getDriver().getName();
+        if (entry.getDriver().getName() == playerDriverName) {
+            driverName += " [YOU]";
+        }
 
+        std::string gapText = "Leader";
         if (i != 0) {
             double gap = entry.getTotalTime() - leaderTime;
             std::ostringstream oss;
@@ -167,7 +256,7 @@ void GameController::printStandings() const {
 
         std::cout << std::left
             << std::setw(4) << entry.getPosition()
-            << std::setw(14) << entry.getDriver().getName()
+            << std::setw(20) << driverName
             << std::setw(10) << gapText
             << std::setw(10) << entry.getStrategy().getModeName()
             << std::setw(10) << entry.getCar().getTyre().getCompoundName();
@@ -176,7 +265,7 @@ void GameController::printStandings() const {
             << std::setw(10) << entry.getCar().getTyre().getWear()
             << std::setw(10) << entry.getCar().getTyre().getTemperature()
             << std::setw(10) << entry.getCar().getFuel()
-            << std::setw(10) << (entry.getLastEvent().empty() ? "-" : entry.getLastEvent())
+            << std::setw(14) << (entry.getLastEvent().empty() ? "-" : entry.getLastEvent())
             << "\n";
     }
 }

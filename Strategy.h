@@ -13,6 +13,7 @@ private:
     RaceMode mode;
     int plannedPitLap;
     TyreCompound nextPitCompound;
+    bool forcePitRequest;
 
 public:
     Strategy();
@@ -21,9 +22,13 @@ public:
     RaceMode getMode() const;
     int getPlannedPitLap() const;
     TyreCompound getNextPitCompound() const;
+    bool hasForcedPitRequest() const;
 
     void setMode(RaceMode mode);
     void setNextPitCompound(TyreCompound compound);
+
+    void requestPitStop();
+    void clearPitRequest();
 
     bool shouldPit(int currentLap, double tyreWear) const;
 

@@ -28,37 +28,24 @@ double Race::calculateLapTime(RaceEntry& entry) {
 
     double lapTime = track.getBaseLapTime();
 
-    // Engine effect depends on track power sensitivity
     lapTime -= car.getEngine().getPowerBonus() * track.getPowerSensitivity();
-
-    // Driver effect depends on track technicality
     lapTime -= driver.getPaceBonus() * track.getTechnicality();
-
-    // Tyre grip bonus
     lapTime -= car.getTyre().getGripBonus();
 
-    // Extra wear penalty
     lapTime += car.getTyre().getWear() * 0.03;
-
-    // Fuel penalty
     lapTime += car.getFuelPenalty();
-
-    // Strategy mode
     lapTime += strategy.getPaceModifier();
 
-    // Random variation
     int randomValue = std::rand() % 100;
     double randomFactor = (randomValue / 100.0) - 0.5;
     lapTime += randomFactor;
 
-    // Tyre wear update
     double wearAmount = track.getTyreWearFactor()
         * strategy.getWearModifier()
         * driver.getTyreWearModifier();
 
     car.getTyreRef().increaseWear(wearAmount);
 
-    // Tyre temperature update
     double baseTempEffect = (track.getTrackTemperature() - 30.0) * 0.1;
 
     if (strategy.getMode() == RaceMode::Push) {
@@ -71,7 +58,6 @@ double Race::calculateLapTime(RaceEntry& entry) {
         car.getTyreRef().changeTemperature(1.0 + baseTempEffect);
     }
 
-    // Fuel burn
     car.burnFuel(2.2);
 
     return lapTime;
@@ -79,6 +65,7 @@ double Race::calculateLapTime(RaceEntry& entry) {
 
 void Race::processPitStop(RaceEntry& entry) {
     entry.setPitState(true);
+
     TyreCompound nextCompound = entry.getStrategy().getNextPitCompound();
     std::string compoundName = Tyre(nextCompound).getCompoundName();
 
@@ -86,6 +73,8 @@ void Race::processPitStop(RaceEntry& entry) {
     entry.setLastEvent("PIT -> " + compoundName);
 
     entry.getCarRef().changeTyres(nextCompound);
+    entry.getStrategyRef().clearPitRequest();
+
     entry.setPitState(false);
 }
 
@@ -126,6 +115,19 @@ void Race::updatePositions() {
 
 void Race::finishRace() {
     finished = true;
+}
+
+void Race::setParticipantMode(int index, RaceMode mode) {
+    if (index >= 0 && index < static_cast<int>(participants.size())) {
+        participants[index].getStrategyRef().setMode(mode);
+    }
+}
+
+void Race::forcePitStop(int index, TyreCompound compound) {
+    if (index >= 0 && index < static_cast<int>(participants.size())) {
+        participants[index].getStrategyRef().setNextPitCompound(compound);
+        participants[index].getStrategyRef().requestPitStop();
+    }
 }
 
 bool Race::isFinished() const {

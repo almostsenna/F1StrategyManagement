@@ -2,8 +2,26 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
 
-GameController::GameController() : race(), playerDriverName("Verstappen") {}
+GameController::GameController() : race(),
+playerDriverName("Verstappen"),
+selectedRaceType(RaceType::GrandPrix),
+customLapCount(10) {
+    initializeDriverProfiles();
+}
+
+void GameController::showMainMenu() {
+    std::cout << "\n========================================\n";
+    std::cout << " Formula 1 Race Strategy Simulator\n";
+    std::cout << "========================================\n";
+    std::cout << "1. Start New Race\n";
+    std::cout << "2. Show Drivers\n";
+    std::cout << "3. Show Driver Bio\n";
+    std::cout << "4. Choose Race Type\n";
+    std::cout << "5. Exit\n";
+    std::cout << "Enter choice: ";
+}
 
 Track GameController::chooseTrack() const {
     int choice = 0;
@@ -40,28 +58,45 @@ Track GameController::chooseTrack() const {
     }
 }
 
-std::string  GameController::chooseDriverName() const {
-    int choice = 0;
+std::string GameController::chooseDriverName() const {
+    if (driverProfiles.empty()) {
+        std::cout << "No drivers available. Verstappen selected by default.\n";
+        return "Verstappen";
+    }
 
     std::cout << "\nChoose your driver:\n";
-    std::cout << "1. Verstappen\n";
-    std::cout << "2. Leclerc\n";
-    std::cout << "3. Norris\n";
-    std::cout << "4. Hamilton\n";
+
+    for (size_t i = 0; i < driverProfiles.size(); i++) {
+        const auto& d = driverProfiles[i];
+        std::cout << std::setw(2) << (i + 1) << ". "
+            << std::setw(12) << std::left << d.name
+            << " | Team: " << std::setw(15) << d.team
+            << " | #" << d.number
+            << "\n";
+    }
+
     std::cout << "Enter choice: ";
+    int choice = 0;
     std::cin >> choice;
     std::cin.ignore();
 
-    switch (choice) {
-    case 1: return "Verstappen";
-    case 2: return "Leclerc";
-    case 3: return "Norris";
-    case 4: return "Hamilton";
-    default:
+    if (choice < 1 || choice > static_cast<int>(driverProfiles.size())) {
         std::cout << "Invalid choice. Verstappen selected by default.\n";
         return "Verstappen";
     }
+
+    return driverProfiles[choice - 1].name;
 }
+
+std::string GameController::getDriverTier(const DriverProfile& driver) const {
+    double average = (driver.skill + driver.consistency + driver.tyreManagement) / 3.0;
+
+    if (average >= 93.0) return "Elite";
+    if (average >= 88.0) return "Top Tier";
+    if (average >= 82.0) return "Strong";
+    return "Developing";
+}
+
 int GameController::findPlayerIndex() const {
     const auto& participants = race.getParticipants();
 
@@ -114,42 +149,56 @@ Track GameController::createInterlagos() const {
     return Track("Interlagos", 4.309, 10, 1.2, 71.0, 1.1, 1.1, 26.0);
 }
 
+Track GameController::applyRaceTypeToTrack(const Track& baseTrack) const {
+    Track modifiedTrack = baseTrack;
+
+    switch (selectedRaceType) {
+    case RaceType::Sprint: {
+        int sprintLaps = baseTrack.getLaps() / 3;
+        if (sprintLaps < 1) sprintLaps = 1;
+        modifiedTrack.setLaps(sprintLaps);
+        break;
+    }
+    case RaceType::GrandPrix:
+        // залишаємо стандартну кількість кіл
+        break;
+    case RaceType::Custom:
+        modifiedTrack.setLaps(customLapCount);
+        break;
+    default:
+        break;
+    }
+
+    return modifiedTrack;
+}
+
 void GameController::setupTestRace() {
-    Track selectedTrack = chooseTrack();
+    Track baseTrack = chooseTrack();
+    Track selectedTrack = applyRaceTypeToTrack(baseTrack);
     playerDriverName = chooseDriverName();
 
     std::cout << "\nSelected track: " << selectedTrack.getName() << "\n";
+
+    std::cout << "Race type: ";
+    switch (selectedRaceType) {
+    case RaceType::Sprint:
+        std::cout << "Sprint\n";
+        break;
+    case RaceType::GrandPrix:
+        std::cout << "Grand Prix\n";
+        break;
+    case RaceType::Custom:
+        std::cout << "Custom\n";
+        break;
+    }
+
+    std::cout << "Laps: " << selectedTrack.getLaps() << "\n";
     std::cout << "Power sensitivity: " << selectedTrack.getPowerSensitivity() << "\n";
     std::cout << "Technicality: " << selectedTrack.getTechnicality() << "\n";
-    std::cout << "Track temperature: " << selectedTrack.getTrackTemperature() << " C\n\n";
+    std::cout << "Track temperature: " << selectedTrack.getTrackTemperature() << " C\n";
     std::cout << "Your driver: " << playerDriverName << "\n\n";
 
-
-    race = Race(selectedTrack);
-
-    Driver verstappen("Verstappen", 96, 94, 88);
-    Driver leclerc("Leclerc", 93, 90, 85);
-    Driver norris("Norris", 91, 89, 87);
-    Driver hamilton("Hamilton", 95, 95, 92);
-
-    Engine redBullPU("Honda RBPT", 950, 92);
-    Engine ferrariPU("Ferrari", 945, 90);
-    Engine mercedesPU("Mercedes", 940, 94);
-
-    F1Car rbCar("RB", redBullPU, Tyre(TyreCompound::Soft), 798.0, 100.0);
-    F1Car ferrariCar("Ferrari", ferrariPU, Tyre(TyreCompound::Soft), 798.0, 100.0);
-    F1Car mclarenCar("McLaren", mercedesPU, Tyre(TyreCompound::Medium), 798.0, 100.0);
-    F1Car mercCar("Mercedes", mercedesPU, Tyre(TyreCompound::Medium), 798.0, 100.0);
-
-    Strategy pushStrategy(RaceMode::Push, 4, TyreCompound::Medium);
-    Strategy normalStrategy(RaceMode::Normal, 5, TyreCompound::Hard);
-    Strategy normalStrategy2(RaceMode::Normal, 5, TyreCompound::Hard);
-    Strategy conserveStrategy(RaceMode::Conserve, 6, TyreCompound::Hard);
-
-    race.addParticipant(RaceEntry(verstappen, rbCar, pushStrategy));
-    race.addParticipant(RaceEntry(leclerc, ferrariCar, normalStrategy));
-    race.addParticipant(RaceEntry(norris, mclarenCar, normalStrategy2));
-    race.addParticipant(RaceEntry(hamilton, mercCar, conserveStrategy));
+    setupFullGridRace(selectedTrack);
 }
 
 void GameController::start() {
@@ -273,3 +322,345 @@ void GameController::printStandings() const {
 bool GameController::isRaceFinished() const {
     return race.isFinished();
 }
+
+void GameController::initializeDriverProfiles() {
+    driverProfiles.clear();
+
+    driverProfiles.push_back({"Verstappen","Red Bull",1,"Netherlands",28,11,
+        "Multiple-time world champion known for elite pace and aggressive racecraft.",
+        "RB","Honda RBPT",96,94,88,1});
+
+    driverProfiles.push_back({"Leclerc","Ferrari",16,"Monaco",28,8,
+        "Fast and precise Ferrari driver with excellent qualifying pace.",
+        "Ferrari","Ferrari",93,90,85,2});
+
+    driverProfiles.push_back({"Norris","McLaren",4,"United Kingdom",26,7,
+        "Quick and consistent driver with strong race awareness.",
+        "McLaren","Mercedes",91,89,87,3});
+
+    driverProfiles.push_back({"Hamilton","Ferrari",44,"United Kingdom",41,19,
+        "Legendary champion with elite consistency and tyre management.",
+        "Ferrari","Ferrari",95,95,92,4});
+
+    driverProfiles.push_back({"Russell","Mercedes",63,"United Kingdom",28,7,
+        "Balanced driver with strong technical feedback and consistency.",
+        "Mercedes","Mercedes",91,90,87,5});
+
+    driverProfiles.push_back({"Piastri","McLaren",81,"Australia",25,3,
+        "Calm and efficient racer with strong long-run pace.",
+        "McLaren","Mercedes",89,87,86,6});
+
+    driverProfiles.push_back({"Alonso","Aston Martin",14,"Spain",44,23,
+        "Extremely experienced and tactical driver.",
+        "Aston Martin","Honda",92,94,90,7});
+
+    driverProfiles.push_back({"Antonelli","Mercedes",12,"Italy",20,1,
+        "Highly rated young driver beginning his Mercedes career.",
+        "Mercedes","Mercedes",87,82,81,8});
+
+    driverProfiles.push_back({"Sainz","Williams",55,"Spain",31,11,
+        "Intelligent and very consistent driver with solid tyre management.",
+        "Williams","Mercedes",90,91,88,9});
+
+    driverProfiles.push_back({"Gasly","Alpine",10,"France",29,9,
+        "Quick and experienced driver with strong recovery pace.",
+        "Alpine","Renault",88,87,85,10});
+
+    driverProfiles.push_back({"Albon","Williams",23,"Thailand",29,7,
+        "Strong driver known for maximizing difficult machinery.",
+        "Williams","Mercedes",88,87,86,11});
+
+    driverProfiles.push_back({"Perez","Cadillac",11,"Mexico",35,13,
+        "Excellent tyre manager and dependable long-run racer.",
+        "Cadillac","Cadillac PU",89,91,92,12});
+
+    driverProfiles.push_back({"Bottas","Cadillac",77,"Finland",36,13,
+        "Experienced driver with strong qualifying pace and technical feedback.",
+        "Cadillac","Cadillac PU",88,90,89,13});
+
+    driverProfiles.push_back({"Ocon","Haas",31,"France",29,9,
+        "Consistent racer with strong defensive driving.",
+        "Haas","Ferrari",87,88,86,14});
+
+    driverProfiles.push_back({"Hulkenberg","Audi",27,"Germany",38,13,
+        "Experienced and dependable driver with strong consistency.",
+        "Audi","Audi",87,89,88,15});
+
+    driverProfiles.push_back({"Stroll","Aston Martin",18,"Canada",27,9,
+        "Reliable midfield-level driver with occasional strong weekends.",
+        "Aston Martin","Honda",84,83,82,16});
+
+    driverProfiles.push_back({"Lawson","VCARB",30,"New Zealand",24,2,
+        "Aggressive and promising driver with solid race instincts.",
+        "VCARB","Honda RBPT",84,82,81,17});
+
+    driverProfiles.push_back({"Colapinto","Alpine",43,"Argentina",23,2,
+        "Young, exciting driver with strong adaptability.",
+        "Alpine","Renault",85,81,80,18});
+
+    driverProfiles.push_back({"Bearman","Haas",87,"United Kingdom",21,1,
+        "Young driver with aggressive style and high potential.",
+        "Haas","Ferrari",84,79,78,19});
+
+    driverProfiles.push_back({"Bortoleto","Audi",5,"Brazil",21,1,
+        "Promising rookie stepping into Audi's new era.",
+        "Audi","Audi",84,80,79,20});
+
+    driverProfiles.push_back({"Tsunoda","Red Bull",22,"Japan",26,6,
+        "Fast and improving driver with strong race pace.",
+        "RB","Honda RBPT",88,85,84,21});
+
+    driverProfiles.push_back({"Lindblad","VCARB",25,"United Kingdom",19,1,
+        "Highly rated rookie entering Formula 1 with strong junior credentials.",
+        "VCARB","Honda RBPT",83,78,77,22});
+}
+
+void GameController::showDrivers() const {
+    std::cout << "\n================================ DRIVER LIST ================================\n";
+    std::cout << std::left
+        << std::setw(4) << "No"
+        << std::setw(15) << "Driver"
+        << std::setw(15) << "Team"
+        << std::setw(8) << "#"
+        << std::setw(15) << "Nation"
+        << std::setw(12) << "Tier"
+        << "\n";
+
+    std::cout << "-----------------------------------------------------------------------------\n";
+
+    for (size_t i = 0; i < driverProfiles.size(); i++) {
+        const auto& d = driverProfiles[i];
+
+        std::cout << std::left
+            << std::setw(4) << (i + 1)
+            << std::setw(15) << d.name
+            << std::setw(15) << d.team
+            << std::setw(8) << d.number
+            << std::setw(15) << d.nationality
+            << std::setw(12) << getDriverTier(d)
+            << "\n";
+    }
+
+    std::cout << "=============================================================================\n";
+}
+
+void GameController::showDriverBio() const {
+    if (driverProfiles.empty()) {
+        std::cout << "\nNo drivers available.\n";
+        return;
+    }
+
+    std::cout << "\nChoose driver to view bio:\n";
+    for (size_t i = 0; i < driverProfiles.size(); i++) {
+        std::cout << i + 1 << ". " << driverProfiles[i].name << "\n";
+    }
+
+    std::cout << "Enter choice: ";
+    int choice = 0;
+    std::cin >> choice;
+    std::cin.ignore();
+
+    if (choice < 1 || choice > static_cast<int>(driverProfiles.size())) {
+        std::cout << "Invalid choice.\n";
+        return;
+    }
+
+    const auto& d = driverProfiles[choice - 1];
+
+    std::cout << "\n============================== DRIVER PROFILE ==============================\n";
+    std::cout << d.name << "  (#" << d.number << ")\n";
+    std::cout << "---------------------------------------------------------------------------\n";
+    std::cout << "Team           : " << d.team << "\n";
+    std::cout << "Nationality    : " << d.nationality << "\n";
+    std::cout << "Age            : " << d.age << "\n";
+    std::cout << "Experience     : " << d.experienceYears << " years\n";
+    std::cout << "Car            : " << d.carModel << "\n";
+    std::cout << "Engine         : " << d.engineName << "\n";
+    std::cout << "Tier           : " << getDriverTier(d) << "\n";
+    std::cout << "---------------------------------------------------------------------------\n";
+    std::cout << "Skill          : " << d.skill << "\n";
+    std::cout << "Consistency    : " << d.consistency << "\n";
+    std::cout << "Tyre Management: " << d.tyreManagement << "\n";
+    std::cout << "---------------------------------------------------------------------------\n";
+    std::cout << "Bio            : " << d.bio << "\n";
+    std::cout << "===========================================================================\n";
+}
+
+void GameController::chooseRaceType() {
+    int choice = 0;
+
+    std::cout << "\nChoose race type:\n";
+    std::cout << "1. Sprint\n";
+    std::cout << "2. Grand Prix\n";
+    std::cout << "3. Custom\n";
+    std::cout << "Enter choice: ";
+    std::cin >> choice;
+    std::cin.ignore();
+
+    switch (choice) {
+    case 1:
+        selectedRaceType = RaceType::Sprint;
+        std::cout << "Sprint selected.\n";
+        break;
+    case 2:
+        selectedRaceType = RaceType::GrandPrix;
+        std::cout << "Grand Prix selected.\n";
+        break;
+    case 3:
+        selectedRaceType = RaceType::Custom;
+        std::cout << "Enter custom lap count: ";
+        std::cin >> customLapCount;
+        std::cin.ignore();
+
+        if (customLapCount <= 0) {
+            customLapCount = 10;
+            std::cout << "Invalid lap count. Default value 10 applied.\n";
+        }
+
+        std::cout << "Custom race selected: " << customLapCount << " laps.\n";
+        break;
+    default:
+        std::cout << "Invalid choice. Grand Prix remains selected.\n";
+        selectedRaceType = RaceType::GrandPrix;
+        break;
+    }
+}
+
+
+void GameController::run() {
+    bool running = true;
+
+    while (running) {
+        showMainMenu();
+
+        int choice = 0;
+        std::cin >> choice;
+        std::cin.ignore();
+
+        switch (choice) {
+        case 1:
+            setupTestRace();
+            start();
+
+            while (!isRaceFinished()) {
+                printStandings();
+                simulateOneLap();
+            }
+
+            printStandings();
+            std::cout << "\nRace finished!\n";
+            break;
+
+        case 2:
+            showDrivers();
+            break;
+
+        case 3:
+            showDriverBio();
+            break;
+
+        case 4:
+            chooseRaceType();
+            break;
+
+        case 5:
+            running = false;
+            std::cout << "Exiting program...\n";
+            break;
+
+        default:
+            std::cout << "Invalid menu choice.\n";
+            break;
+        }
+    }
+}
+
+Engine GameController::createEngineForTeam(const std::string& team) const {
+    if (team == "Red Bull" || team == "VCARB") {
+        return Engine("Honda RBPT", 950, 92);
+    }
+    if (team == "Ferrari" || team == "Haas") {
+        return Engine("Ferrari", 945, 90);
+    }
+    if (team == "Mercedes" || team == "McLaren" || team == "Williams") {
+        return Engine("Mercedes", 940, 94);
+    }
+    if (team == "Aston Martin") {
+        return Engine("Honda", 944, 91);
+    }
+    if (team == "Alpine") {
+        return Engine("Renault", 930, 88);
+    }
+    if (team == "Audi") {
+        return Engine("Audi", 936, 89);
+    }
+    if (team == "Cadillac") {
+        return Engine("Cadillac PU", 938, 90);
+    }
+
+    return Engine("Generic Engine", 900, 85);
+}
+
+F1Car GameController::createCarForProfile(const DriverProfile& profile) const {
+    Engine engine = createEngineForTeam(profile.team);
+
+    TyreCompound startCompound = TyreCompound::Medium;
+
+    if (profile.startingPosition <= 6) {
+        startCompound = TyreCompound::Soft;
+    }
+    else if (profile.startingPosition <= 14) {
+        startCompound = TyreCompound::Medium;
+    }
+    else {
+        startCompound = TyreCompound::Hard;
+    }
+
+    return F1Car(
+        profile.carModel,
+        engine,
+        Tyre(startCompound),
+        798.0,
+        100.0
+    );
+}
+
+Strategy GameController::createStrategyForPosition(int startingPosition) const {
+    if (startingPosition <= 4) {
+        return Strategy(RaceMode::Push, 4, TyreCompound::Medium);
+    }
+    else if (startingPosition <= 10) {
+        return Strategy(RaceMode::Normal, 5, TyreCompound::Hard);
+    }
+    else if (startingPosition <= 16) {
+        return Strategy(RaceMode::Normal, 6, TyreCompound::Hard);
+    }
+    else {
+        return Strategy(RaceMode::Conserve, 7, TyreCompound::Medium);
+    }
+}
+void GameController::setupFullGridRace(const Track& selectedTrack) {
+    race = Race(selectedTrack);
+
+    std::vector<DriverProfile> sortedProfiles = driverProfiles;
+
+    std::sort(sortedProfiles.begin(), sortedProfiles.end(),
+        [](const DriverProfile& a, const DriverProfile& b) {
+            return a.startingPosition < b.startingPosition;
+        });
+
+    for (const auto& profile : sortedProfiles) {
+        Driver driver(
+            profile.name,
+            profile.skill,
+            profile.consistency,
+            profile.tyreManagement
+        );
+
+        F1Car car = createCarForProfile(profile);
+        Strategy strategy = createStrategyForPosition(profile.startingPosition);
+
+        race.addParticipant(RaceEntry(driver, car, strategy));
+    }
+}
+

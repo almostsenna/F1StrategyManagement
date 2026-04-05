@@ -3,17 +3,6 @@
 
 int main() {
     GameController controller;
-
-    controller.setupTestRace();
-    controller.start();
-
-    while (!controller.isRaceFinished()) {
-        controller.simulateOneLap();
-        controller.printStandings();
-
-        
-    }
-
-    std::cout << "\nRace finished!\n";
+    controller.run();
     return 0;
 }

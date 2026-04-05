@@ -60,3 +60,9 @@ double Track::getTechnicality() const {
 double Track::getTrackTemperature() const {
     return trackTemperature;
 }
+
+void Track::setLaps(int laps) {
+    if (laps > 0) {
+        this->laps = laps;
+    }
+}

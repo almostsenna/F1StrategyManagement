@@ -128,16 +128,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Driver.h" />
+    <ClInclude Include="DriverProfile.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="F1Car.h" />
     <ClInclude Include="Race.h" />
     <ClInclude Include="RaceEntry.h" />
+    <ClInclude Include="RaceType.h" />
     <ClInclude Include="Strategy.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="Tyre.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Driver.cpp" />
+    <ClCompile Include="DriverProfile.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="F1Car.cpp" />
     <ClCompile Include="GameController.cpp" />

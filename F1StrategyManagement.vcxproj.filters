@@ -39,6 +39,12 @@
     <ClInclude Include="Race.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DriverProfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RaceType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameController.h">
@@ -72,6 +78,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Strategy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverProfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

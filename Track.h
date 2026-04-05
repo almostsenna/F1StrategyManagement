@@ -31,4 +31,6 @@ public:
     double getPowerSensitivity() const;
     double getTechnicality() const;
     double getTrackTemperature() const;
+    void setLaps(int laps);
+
 };

@@ -23,6 +23,8 @@ public:
     void updatePositions();
     void finishRace();
 
+    // --- НОВИЙ МЕТОД ДЛЯ КОЛЬОРОВОГО ВИНТЕРФЕЙСУ ---
+    void displayStatus() const;
 
     void setParticipantMode(int index, RaceMode mode);
     void forcePitStop(int index, TyreCompound compound);

@@ -1,7 +1,10 @@
 #include "Race.h"
+#include "ColorUtils.h"
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <iostream>
+#include <iomanip>
 
 Race::Race() : track(), currentLap(0), finished(false) {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
@@ -27,11 +30,9 @@ double Race::calculateLapTime(RaceEntry& entry) {
     Strategy& strategy = entry.getStrategyRef();
 
     double lapTime = track.getBaseLapTime();
-
     lapTime -= car.getEngine().getPowerBonus() * track.getPowerSensitivity();
     lapTime -= driver.getPaceBonus() * track.getTechnicality();
     lapTime -= car.getTyre().getGripBonus();
-
     lapTime += car.getTyre().getWear() * 0.03;
     lapTime += car.getFuelPenalty();
     lapTime += strategy.getPaceModifier();
@@ -43,7 +44,6 @@ double Race::calculateLapTime(RaceEntry& entry) {
     double wearAmount = track.getTyreWearFactor()
         * strategy.getWearModifier()
         * driver.getTyreWearModifier();
-
     car.getTyreRef().increaseWear(wearAmount);
 
     double baseTempEffect = (track.getTrackTemperature() - 30.0) * 0.1;
@@ -59,9 +59,9 @@ double Race::calculateLapTime(RaceEntry& entry) {
     }
 
     car.burnFuel(2.2);
-
     return lapTime;
 }
+
 
 void Race::processPitStop(RaceEntry& entry) {
     entry.setPitState(true);
@@ -85,7 +85,6 @@ void Race::simulateLap() {
 
     for (auto& entry : participants) {
         entry.clearLastEvent();
-
         double lapTime = calculateLapTime(entry);
         entry.addTime(lapTime);
         entry.addLap();
@@ -130,18 +129,69 @@ void Race::forcePitStop(int index, TyreCompound compound) {
     }
 }
 
-bool Race::isFinished() const {
-    return finished;
-}
+bool Race::isFinished() const { return finished; }
+int Race::getCurrentLap() const { return currentLap; }
+const Track& Race::getTrack() const { return track; }
+const std::vector<RaceEntry>& Race::getParticipants() const { return participants; }
 
-int Race::getCurrentLap() const {
-    return currentLap;
-}
+void Race::displayStatus() const {
+    setColor(YELLOW);
+    std::cout << "\n================================================================================\n";
+    std::cout << " Lap " << currentLap << " / " << track.getLaps()
+        << " | Track: " << track.getName() << "\n";
+    std::cout << "================================================================================\n";
 
-const Track& Race::getTrack() const {
-    return track;
-}
+    setColor(CYAN);
+    printf("%-4s %-18s %-10s %-10s %-8s %-7s %-7s %-7s %s\n",
+        "Pos", "Driver", "Gap", "Mode", "Tyre", "Wear%", "TempC", "Fuel", "Event");
+    resetColor();
+    std::cout << "--------------------------------------------------------------------------------\n";
 
-const std::vector<RaceEntry>& Race::getParticipants() const {
-    return participants;
+    double leaderTime = participants.empty() ? 0.0 : participants[0].getTotalTime();
+
+    for (const auto& entry : participants) {
+        bool isPlayer = (entry.getDriver().getName() == "Verstappen");
+
+        if (isPlayer) setColor(BLUE);
+        std::string label = entry.getDriver().getName() + (isPlayer ? " [YOU]" : "");
+        printf("%-4d %-18s ", entry.getPosition(), label.c_str());
+        resetColor();
+
+        if (entry.getPosition() == 1) {
+            printf("%-10s ", "Leader");
+        }
+        else {
+            char gap[16];
+            std::snprintf(gap, sizeof(gap), "+%.2f", entry.getTotalTime() - leaderTime);
+            printf("%-10s ", gap);
+        }
+
+        RaceMode m = entry.getStrategy().getMode();
+        if (m == RaceMode::Push)          setColor(RED);
+        else if (m == RaceMode::Conserve) setColor(GREEN);
+        printf("%-10s ", m == RaceMode::Push ? "Push" :
+            (m == RaceMode::Conserve ? "Conserve" : "Normal"));
+        resetColor();
+
+        TyreCompound tc = entry.getCar().getTyre().getCompound();
+        if (tc == TyreCompound::Soft)        setColor(RED);
+        else if (tc == TyreCompound::Medium) setColor(YELLOW);
+        else                                 setColor(WHITE);
+        printf("%-8s ", entry.getCar().getTyre().getCompoundName().c_str());
+        resetColor();
+
+        printf("%-7.2f %-7.2f %-7.2f ",
+            entry.getCar().getTyre().getWear(),
+            entry.getCar().getTyre().getTemperature(),
+            entry.getCar().getFuel());
+
+        if (!entry.getLastEvent().empty()) {
+            setColor(CYAN);
+            printf("%s", entry.getLastEvent().c_str());
+            resetColor();
+        }
+
+        printf("\n");
+    }
+    std::cout << "--------------------------------------------------------------------------------\n";
 }

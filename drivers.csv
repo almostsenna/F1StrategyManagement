@@ -1,0 +1,23 @@
+name,team,number,nationality,age,experienceYears,bio,carModel,engineName,skill,consistency,tyreManagement,startingPosition
+Verstappen,Red Bull,1,Netherlands,28,11,Multiple-time world champion known for elite pace and aggressive racecraft.,RB,Honda RBPT,96,94,88,1
+Leclerc,Ferrari,16,Monaco,28,8,Fast and precise Ferrari driver with excellent qualifying pace.,Ferrari,Ferrari,93,90,85,2
+Norris,McLaren,4,United Kingdom,26,7,Quick and consistent driver with strong race awareness.,McLaren,Mercedes,91,89,87,3
+Hamilton,Ferrari,44,United Kingdom,41,19,Legendary champion with elite consistency and tyre management.,Ferrari,Ferrari,95,95,92,4
+Russell,Mercedes,63,United Kingdom,28,7,Balanced driver with strong technical feedback and consistency.,Mercedes,Mercedes,91,90,87,5
+Piastri,McLaren,81,Australia,25,3,Calm and efficient racer with strong long-run pace.,McLaren,Mercedes,89,87,86,6
+Alonso,Aston Martin,14,Spain,44,23,Extremely experienced and tactical driver.,Aston Martin,Honda,92,94,90,7
+Antonelli,Mercedes,12,Italy,20,1,Highly rated young driver beginning his Mercedes career.,Mercedes,Mercedes,87,82,81,8
+Sainz,Williams,55,Spain,31,11,Intelligent and very consistent driver with solid tyre management.,Williams,Mercedes,90,91,88,9
+Gasly,Alpine,10,France,29,9,Quick and experienced driver with strong recovery pace.,Alpine,Renault,88,87,85,10
+Albon,Williams,23,Thailand,29,7,Strong driver known for maximizing difficult machinery.,Williams,Mercedes,88,87,86,11
+Perez,Cadillac,11,Mexico,35,13,Excellent tyre manager and dependable long-run racer.,Cadillac,Cadillac PU,89,91,92,12
+Bottas,Cadillac,77,Finland,36,13,Experienced driver with strong qualifying pace and technical feedback.,Cadillac,Cadillac PU,88,90,89,13
+Ocon,Haas,31,France,29,9,Consistent racer with strong defensive driving.,Haas,Ferrari,87,88,86,14
+Hulkenberg,Audi,27,Germany,38,13,Experienced and dependable driver with strong consistency.,Audi,Audi,87,89,88,15
+Stroll,Aston Martin,18,Canada,27,9,Reliable midfield-level driver with occasional strong weekends.,Aston Martin,Honda,84,83,82,16
+Lawson,VCARB,30,New Zealand,24,2,Aggressive and promising driver with solid race instincts.,VCARB,Honda RBPT,84,82,81,17
+Colapinto,Alpine,43,Argentina,23,2,Young exciting driver with strong adaptability.,Alpine,Renault,85,81,80,18
+Bearman,Haas,87,United Kingdom,21,1,Young driver with aggressive style and high potential.,Haas,Ferrari,84,79,78,19
+Bortoleto,Audi,5,Brazil,21,1,Promising rookie stepping into Audi's new era.,Audi,Audi,84,80,79,20
+Tsunoda,Red Bull,22,Japan,26,6,Fast and improving driver with strong race pace.,RB,Honda RBPT,88,85,84,21
+Lindblad,VCARB,25,United Kingdom,19,1,Highly rated rookie entering Formula 1 with strong junior credentials.,VCARB,Honda RBPT,83,78,77,22

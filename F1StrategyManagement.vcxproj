@@ -152,6 +152,9 @@
     <ClCompile Include="Track.cpp" />
     <ClCompile Include="Tyre.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="drivers.csv" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

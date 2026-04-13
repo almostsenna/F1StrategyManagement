@@ -2,13 +2,15 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <fstream>
 #include <algorithm>
 
-GameController::GameController() : race(),
-playerDriverName("Verstappen"),
-selectedRaceType(RaceType::GrandPrix),
-customLapCount(10) {
-    initializeDriverProfiles();
+GameController::GameController() 
+  : race(),
+    playerDriverName("Verstappen"),
+    selectedRaceType(RaceType::GrandPrix),
+    customLapCount(10) {
+   initializeDriverProfiles();
 }
 
 void GameController::showMainMenu() {
@@ -324,97 +326,64 @@ bool GameController::isRaceFinished() const {
 }
 
 void GameController::initializeDriverProfiles() {
-    driverProfiles.clear();
-
-    driverProfiles.push_back({"Verstappen","Red Bull",1,"Netherlands",28,11,
-        "Multiple-time world champion known for elite pace and aggressive racecraft.",
-        "RB","Honda RBPT",96,94,88,1});
-
-    driverProfiles.push_back({"Leclerc","Ferrari",16,"Monaco",28,8,
-        "Fast and precise Ferrari driver with excellent qualifying pace.",
-        "Ferrari","Ferrari",93,90,85,2});
-
-    driverProfiles.push_back({"Norris","McLaren",4,"United Kingdom",26,7,
-        "Quick and consistent driver with strong race awareness.",
-        "McLaren","Mercedes",91,89,87,3});
-
-    driverProfiles.push_back({"Hamilton","Ferrari",44,"United Kingdom",41,19,
-        "Legendary champion with elite consistency and tyre management.",
-        "Ferrari","Ferrari",95,95,92,4});
-
-    driverProfiles.push_back({"Russell","Mercedes",63,"United Kingdom",28,7,
-        "Balanced driver with strong technical feedback and consistency.",
-        "Mercedes","Mercedes",91,90,87,5});
-
-    driverProfiles.push_back({"Piastri","McLaren",81,"Australia",25,3,
-        "Calm and efficient racer with strong long-run pace.",
-        "McLaren","Mercedes",89,87,86,6});
-
-    driverProfiles.push_back({"Alonso","Aston Martin",14,"Spain",44,23,
-        "Extremely experienced and tactical driver.",
-        "Aston Martin","Honda",92,94,90,7});
-
-    driverProfiles.push_back({"Antonelli","Mercedes",12,"Italy",20,1,
-        "Highly rated young driver beginning his Mercedes career.",
-        "Mercedes","Mercedes",87,82,81,8});
-
-    driverProfiles.push_back({"Sainz","Williams",55,"Spain",31,11,
-        "Intelligent and very consistent driver with solid tyre management.",
-        "Williams","Mercedes",90,91,88,9});
-
-    driverProfiles.push_back({"Gasly","Alpine",10,"France",29,9,
-        "Quick and experienced driver with strong recovery pace.",
-        "Alpine","Renault",88,87,85,10});
-
-    driverProfiles.push_back({"Albon","Williams",23,"Thailand",29,7,
-        "Strong driver known for maximizing difficult machinery.",
-        "Williams","Mercedes",88,87,86,11});
-
-    driverProfiles.push_back({"Perez","Cadillac",11,"Mexico",35,13,
-        "Excellent tyre manager and dependable long-run racer.",
-        "Cadillac","Cadillac PU",89,91,92,12});
-
-    driverProfiles.push_back({"Bottas","Cadillac",77,"Finland",36,13,
-        "Experienced driver with strong qualifying pace and technical feedback.",
-        "Cadillac","Cadillac PU",88,90,89,13});
-
-    driverProfiles.push_back({"Ocon","Haas",31,"France",29,9,
-        "Consistent racer with strong defensive driving.",
-        "Haas","Ferrari",87,88,86,14});
-
-    driverProfiles.push_back({"Hulkenberg","Audi",27,"Germany",38,13,
-        "Experienced and dependable driver with strong consistency.",
-        "Audi","Audi",87,89,88,15});
-
-    driverProfiles.push_back({"Stroll","Aston Martin",18,"Canada",27,9,
-        "Reliable midfield-level driver with occasional strong weekends.",
-        "Aston Martin","Honda",84,83,82,16});
-
-    driverProfiles.push_back({"Lawson","VCARB",30,"New Zealand",24,2,
-        "Aggressive and promising driver with solid race instincts.",
-        "VCARB","Honda RBPT",84,82,81,17});
-
-    driverProfiles.push_back({"Colapinto","Alpine",43,"Argentina",23,2,
-        "Young, exciting driver with strong adaptability.",
-        "Alpine","Renault",85,81,80,18});
-
-    driverProfiles.push_back({"Bearman","Haas",87,"United Kingdom",21,1,
-        "Young driver with aggressive style and high potential.",
-        "Haas","Ferrari",84,79,78,19});
-
-    driverProfiles.push_back({"Bortoleto","Audi",5,"Brazil",21,1,
-        "Promising rookie stepping into Audi's new era.",
-        "Audi","Audi",84,80,79,20});
-
-    driverProfiles.push_back({"Tsunoda","Red Bull",22,"Japan",26,6,
-        "Fast and improving driver with strong race pace.",
-        "RB","Honda RBPT",88,85,84,21});
-
-    driverProfiles.push_back({"Lindblad","VCARB",25,"United Kingdom",19,1,
-        "Highly rated rookie entering Formula 1 with strong junior credentials.",
-        "VCARB","Honda RBPT",83,78,77,22});
+    loadDriversFromFile("drivers.csv");
 }
 
+void GameController::loadDriversFromFile(const std::string& filename) {
+    driverProfiles.clear();
+
+    std::ifstream file(filename);
+
+    if (!file.is_open()) {
+        std::cout << "Failed to open file: " << filename << "\n";
+        return;
+    }
+
+    std::string line;
+
+    std::getline(file, line);
+
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string token;
+
+        DriverProfile d;
+
+        std::getline(ss, d.name, ',');
+        std::getline(ss, d.team, ',');
+
+        std::getline(ss, token, ',');
+        d.number = std::stoi(token);
+
+        std::getline(ss, d.nationality, ',');
+
+        std::getline(ss, token, ',');
+        d.age = std::stoi(token);
+
+        std::getline(ss, token, ',');
+        d.experienceYears = std::stoi(token);
+
+        std::getline(ss, d.bio, ',');
+        std::getline(ss, d.carModel, ',');
+        std::getline(ss, d.engineName, ',');
+
+        std::getline(ss, token, ',');
+        d.skill = std::stoi(token);
+
+        std::getline(ss, token, ',');
+        d.consistency = std::stoi(token);
+
+        std::getline(ss, token, ',');
+        d.tyreManagement = std::stoi(token);
+
+        std::getline(ss, token, ',');
+        d.startingPosition = std::stoi(token);
+
+        driverProfiles.push_back(d);
+    }
+
+    file.close();
+}
 void GameController::showDrivers() const {
     std::cout << "\n================================ DRIVER LIST ================================\n";
     std::cout << std::left

@@ -15,6 +15,8 @@ private:
     std::vector<DriverProfile> driverProfiles;
 
     void initializeDriverProfiles();
+    void loadDriversFromFile(const std::string& filename);
+
 
     void showMainMenu();
     void showDrivers() const;
@@ -32,7 +34,7 @@ private:
     F1Car createCarForProfile(const DriverProfile& profile) const;
     Strategy createStrategyForPosition(int startingPosition) const;
     void setupFullGridRace(const Track& selectedTrack);
-
+    
     Track createSilverstone() const;
     Track createMonza() const;
     Track createMonaco() const;

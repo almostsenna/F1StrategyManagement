@@ -1,9 +1,11 @@
 #include "GameController.h"
+#include "ConsoleUtils.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <fstream>
 #include <algorithm>
+#include <limits>
 
 GameController::GameController() 
   : race(),
@@ -13,81 +15,155 @@ GameController::GameController()
    initializeDriverProfiles();
 }
 
+int GameController::getValidatedIntInput(int minValue, int maxValue) const {
+    int value;
+
+    while (true) {
+        std::cin >> value;
+
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Enter a number from "
+                << minValue << " to " << maxValue << ": ";
+            continue;
+        }
+
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+        if (value < minValue || value > maxValue) {
+            std::cout << "Choice out of range. Enter a number from "
+                << minValue << " to " << maxValue << ": ";
+            continue;
+        }
+
+        return value;
+    }
+}
+
 void GameController::showMainMenu() {
-    std::cout << "\n========================================\n";
-    std::cout << " Formula 1 Race Strategy Simulator\n";
-    std::cout << "========================================\n";
+    clearConsole();
+
+    setColor(ConsoleColor::Yellow);
+    std::cout << "\n====================================================\n";
+    std::cout << "           Formula 1 Strategy Management            \n";
+    std::cout << "====================================================\n";
+    resetColor();
+
+    setColor(ConsoleColor::Cyan);
     std::cout << "1. Start New Race\n";
     std::cout << "2. Show Drivers\n";
     std::cout << "3. Show Driver Bio\n";
     std::cout << "4. Choose Race Type\n";
+    resetColor();
+
+    setColor(ConsoleColor::Red);
     std::cout << "5. Exit\n";
+    resetColor();
+
     std::cout << "Enter choice: ";
 }
 
-Track GameController::chooseTrack() const {
-    int choice = 0;
+bool GameController::chooseTrack(Track& selectedTrack) const {
+    while (true) {
+        clearConsole();
 
-    std::cout << "Choose track:\n";
-    std::cout << "1. Silverstone\n";
-    std::cout << "2. Monza\n";
-    std::cout << "3. Monaco\n";
-    std::cout << "4. Spa-Francorchamps\n";
-    std::cout << "5. Suzuka\n";
-    std::cout << "6. Bahrain\n";
-    std::cout << "7. Imola\n";
-    std::cout << "8. Red Bull Ring\n";
-    std::cout << "9. Singapore\n";
-    std::cout << "10. Interlagos\n";
-    std::cout << "Enter choice: ";
-    std::cin >> choice;
-    std::cin.ignore();
+        setColor(ConsoleColor::Yellow);
+        std::cout << "==================== CHOOSE TRACK ====================\n";
+        resetColor();
 
-    switch (choice) {
-    case 1:  return createSilverstone();
-    case 2:  return createMonza();
-    case 3:  return createMonaco();
-    case 4:  return createSpa();
-    case 5:  return createSuzuka();
-    case 6:  return createBahrain();
-    case 7:  return createImola();
-    case 8:  return createRedBullRing();
-    case 9:  return createSingapore();
-    case 10: return createInterlagos();
+        setColor(ConsoleColor::Cyan);
+        std::cout << "1. Silverstone\n";
+        std::cout << "2. Monza\n";
+        std::cout << "3. Monaco\n";
+        std::cout << "4. Spa-Francorchamps\n";
+        std::cout << "5. Suzuka\n";
+        std::cout << "6. Bahrain\n";
+        std::cout << "7. Imola\n";
+        std::cout << "8. Red Bull Ring\n";
+        std::cout << "9. Singapore\n";
+        std::cout << "10. Interlagos\n";
+        resetColor();
+
+        std::cout << "0. Back\n";
+        std::cout << "Enter choice: ";
+
+        int choice = getValidatedIntInput(0, 10);
+
+        switch (choice) {
+        case 0:  return false;
+        case 1:  selectedTrack = createSilverstone(); return true;
+        case 2:  selectedTrack = createMonza(); return true;
+        case 3:  selectedTrack = createMonaco(); return true;
+        case 4:  selectedTrack = createSpa(); return true;
+        case 5:  selectedTrack = createSuzuka(); return true;
+        case 6:  selectedTrack = createBahrain(); return true;
+        case 7:  selectedTrack = createImola(); return true;
+        case 8:  selectedTrack = createRedBullRing(); return true;
+        case 9:  selectedTrack = createSingapore(); return true;
+        case 10: selectedTrack = createInterlagos(); return true;
+        default:
+            break;
+        }
+    }
+}
+
+std::string GameController::getRaceTypeName() const {
+    switch (selectedRaceType) {
+    case RaceType::Sprint:
+        return "Sprint";
+    case RaceType::GrandPrix:
+        return "Grand Prix";
+    case RaceType::Custom:
+        return "Custom";
     default:
-        std::cout << "Invalid choice. Silverstone selected by default.\n";
-        return createSilverstone();
+        return "Unknown";
     }
 }
 
-std::string GameController::chooseDriverName() const {
+bool GameController::chooseDriverName(std::string& selectedDriverName) const {
     if (driverProfiles.empty()) {
-        std::cout << "No drivers available. Verstappen selected by default.\n";
-        return "Verstappen";
+        std::cout << "No drivers available.\n";
+        system("pause");
+        return false;
     }
 
-    std::cout << "\nChoose your driver:\n";
+    while (true) {
+        clearConsole();
 
-    for (size_t i = 0; i < driverProfiles.size(); i++) {
-        const auto& d = driverProfiles[i];
-        std::cout << std::setw(2) << (i + 1) << ". "
-            << std::setw(12) << std::left << d.name
-            << " | Team: " << std::setw(15) << d.team
-            << " | #" << d.number
-            << "\n";
+        setColor(ConsoleColor::Yellow);
+        std::cout << "==================== CHOOSE DRIVER ====================\n";
+        resetColor();
+
+        for (size_t i = 0; i < driverProfiles.size(); i++) {
+            const auto& d = driverProfiles[i];
+
+            setColor(ConsoleColor::Cyan);
+            std::cout << std::setw(2) << (i + 1) << ". ";
+            resetColor();
+
+            setColor(getTeamColor(d.team));
+            std::cout << std::setw(12) << std::left << d.name;
+            resetColor();
+
+            std::cout << " | Team: " << std::setw(15) << d.team
+                << " | #" << d.number
+                << " | Tier: " << getDriverTier(d)
+                << "\n";
+        }
+
+        std::cout << "0. Back\n";
+        std::cout << "Enter choice: ";
+
+        int choice = getValidatedIntInput(0, static_cast<int>(driverProfiles.size()));
+
+        if (choice == 0) {
+            return false;
+        }
+
+        selectedDriverName = driverProfiles[choice - 1].name;
+        return true;
     }
-
-    std::cout << "Enter choice: ";
-    int choice = 0;
-    std::cin >> choice;
-    std::cin.ignore();
-
-    if (choice < 1 || choice > static_cast<int>(driverProfiles.size())) {
-        std::cout << "Invalid choice. Verstappen selected by default.\n";
-        return "Verstappen";
-    }
-
-    return driverProfiles[choice - 1].name;
 }
 
 std::string GameController::getDriverTier(const DriverProfile& driver) const {
@@ -174,33 +250,39 @@ Track GameController::applyRaceTypeToTrack(const Track& baseTrack) const {
     return modifiedTrack;
 }
 
-void GameController::setupTestRace() {
-    Track baseTrack = chooseTrack();
-    Track selectedTrack = applyRaceTypeToTrack(baseTrack);
-    playerDriverName = chooseDriverName();
-
-    std::cout << "\nSelected track: " << selectedTrack.getName() << "\n";
-
-    std::cout << "Race type: ";
-    switch (selectedRaceType) {
-    case RaceType::Sprint:
-        std::cout << "Sprint\n";
-        break;
-    case RaceType::GrandPrix:
-        std::cout << "Grand Prix\n";
-        break;
-    case RaceType::Custom:
-        std::cout << "Custom\n";
-        break;
+bool GameController::setupTestRace() {
+    Track baseTrack;
+    if (!chooseTrack(baseTrack)) {
+        return false;
     }
 
-    std::cout << "Laps: " << selectedTrack.getLaps() << "\n";
-    std::cout << "Power sensitivity: " << selectedTrack.getPowerSensitivity() << "\n";
-    std::cout << "Technicality: " << selectedTrack.getTechnicality() << "\n";
-    std::cout << "Track temperature: " << selectedTrack.getTrackTemperature() << " C\n";
-    std::cout << "Your driver: " << playerDriverName << "\n\n";
+    Track selectedTrack = applyRaceTypeToTrack(baseTrack);
+
+    std::string selectedDriverName;
+    if (!chooseDriverName(selectedDriverName)) {
+        return false;
+    }
+
+    playerDriverName = selectedDriverName;
+
+    clearConsole();
+
+    setColor(ConsoleColor::Yellow);
+    std::cout << "=========================== RACE SETUP ===========================\n";
+    resetColor();
+
+    std::cout << "Selected track    : " << selectedTrack.getName() << "\n";
+    std::cout << "Race type         : " << getRaceTypeName() << "\n";
+    std::cout << "Laps              : " << selectedTrack.getLaps() << "\n";
+    std::cout << "Power sensitivity : " << selectedTrack.getPowerSensitivity() << "\n";
+    std::cout << "Technicality      : " << selectedTrack.getTechnicality() << "\n";
+    std::cout << "Track temperature : " << selectedTrack.getTrackTemperature() << " C\n";
+    std::cout << "Your driver       : " << playerDriverName << "\n";
+    std::cout << "==================================================================\n\n";
 
     setupFullGridRace(selectedTrack);
+    system("pause");
+    return true;
 }
 
 void GameController::start() {
@@ -215,20 +297,31 @@ void GameController::handlePlayerCommand() {
         return;
     }
 
+    clearConsole();
+    printStandings();
+
     std::cout << "\nYour driver: " << participants[playerIndex].getDriver().getName() << "\n";
     std::cout << "Choose action:\n";
+
+    setColor(ConsoleColor::Red);
     std::cout << "1. Push\n";
+    resetColor();
+
+    setColor(ConsoleColor::Yellow);
     std::cout << "2. Normal\n";
+    resetColor();
+
+    setColor(ConsoleColor::Green);
     std::cout << "3. Conserve\n";
+    resetColor();
+
     std::cout << "4. Pit for Soft\n";
     std::cout << "5. Pit for Medium\n";
     std::cout << "6. Pit for Hard\n";
     std::cout << "7. Continue\n";
     std::cout << "Enter choice: ";
 
-    int choice = 0;
-    std::cin >> choice;
-    std::cin.ignore();
+    int choice = getValidatedIntInput(1, 7);
 
     switch (choice) {
     case 1:
@@ -261,10 +354,16 @@ void GameController::simulateOneLap() {
 }
 
 void GameController::printStandings() const {
-    std::cout << "\n====================================================================================================\n";
+    clearConsole();
+
+    setColor(ConsoleColor::Yellow);
+    std::cout << "=====================================================================\n";
     std::cout << "Lap " << race.getCurrentLap() << " / " << race.getTrack().getLaps()
         << " | Track: " << race.getTrack().getName() << "\n";
-    std::cout << "====================================================================================================\n";
+    std::cout << "=====================================================================\n";
+    resetColor();
+
+    printRaceInfoBlock();
 
     const auto& participants = race.getParticipants();
 
@@ -275,6 +374,7 @@ void GameController::printStandings() const {
 
     double leaderTime = participants.front().getTotalTime();
 
+    setColor(ConsoleColor::Yellow);
     std::cout << std::left
         << std::setw(4) << "Pos"
         << std::setw(20) << "Driver"
@@ -286,8 +386,10 @@ void GameController::printStandings() const {
         << std::setw(10) << "Fuel"
         << std::setw(14) << "Event"
         << "\n";
+    resetColor();
 
-    std::cout << "----------------------------------------------------------------------------------------------------\n";
+    std::cout << "------------------------------------------------------------------------"
+        "----------------------------\n";
 
     for (size_t i = 0; i < participants.size(); i++) {
         const auto& entry = participants[i];
@@ -305,12 +407,26 @@ void GameController::printStandings() const {
             gapText = oss.str();
         }
 
-        std::cout << std::left
-            << std::setw(4) << entry.getPosition()
-            << std::setw(20) << driverName
-            << std::setw(10) << gapText
-            << std::setw(10) << entry.getStrategy().getModeName()
-            << std::setw(10) << entry.getCar().getTyre().getCompoundName();
+        std::cout << std::left << std::setw(4) << entry.getPosition();
+
+        if (entry.getDriver().getName() == playerDriverName) {
+            setColor(ConsoleColor::Yellow);
+        }
+        else {
+            resetColor();
+        }
+
+        std::cout << std::setw(20) << driverName;
+        resetColor();
+
+        std::cout << std::setw(10) << gapText;
+
+        std::string modeName = entry.getStrategy().getModeName();
+        setColor(getModeColor(modeName));
+        std::cout << std::setw(10) << modeName;
+        resetColor();
+
+        std::cout << std::setw(10) << entry.getCar().getTyre().getCompoundName();
 
         std::cout << std::fixed << std::setprecision(2)
             << std::setw(10) << entry.getCar().getTyre().getWear()
@@ -385,32 +501,49 @@ void GameController::loadDriversFromFile(const std::string& filename) {
     file.close();
 }
 void GameController::showDrivers() const {
-    std::cout << "\n================================ DRIVER LIST ================================\n";
-    std::cout << std::left
-        << std::setw(4) << "No"
-        << std::setw(15) << "Driver"
-        << std::setw(15) << "Team"
-        << std::setw(8) << "#"
-        << std::setw(15) << "Nation"
-        << std::setw(12) << "Tier"
-        << "\n";
+    while (true) {
+        clearConsole();
 
-    std::cout << "-----------------------------------------------------------------------------\n";
-
-    for (size_t i = 0; i < driverProfiles.size(); i++) {
-        const auto& d = driverProfiles[i];
+        setColor(ConsoleColor::Yellow);
+        std::cout << "\n============================== DRIVER LIST ==============================\n";
+        resetColor();
 
         std::cout << std::left
-            << std::setw(4) << (i + 1)
-            << std::setw(15) << d.name
-            << std::setw(15) << d.team
-            << std::setw(8) << d.number
-            << std::setw(15) << d.nationality
-            << std::setw(12) << getDriverTier(d)
+            << std::setw(4) << "No"
+            << std::setw(15) << "Driver"
+            << std::setw(15) << "Team"
+            << std::setw(8) << "#"
+            << std::setw(15) << "Nation"
+            << std::setw(12) << "Tier"
             << "\n";
-    }
 
-    std::cout << "=============================================================================\n";
+        std::cout << "-------------------------------------------------------------------------\n";
+
+        for (size_t i = 0; i < driverProfiles.size(); i++) {
+            const auto& d = driverProfiles[i];
+
+            std::cout << std::left << std::setw(4) << (i + 1);
+
+            setColor(getTeamColor(d.team));
+            std::cout << std::setw(15) << d.name
+                << std::setw(15) << d.team;
+            resetColor();
+
+            std::cout << std::setw(8) << d.number
+                << std::setw(15) << d.nationality
+                << std::setw(12) << getDriverTier(d)
+                << "\n";
+        }
+
+        std::cout << "=========================================================================\n";
+        std::cout << "0. Back\n";
+        std::cout << "Enter 0 to return: ";
+
+        int back = 0;
+        std::cin >> back;
+        std::cin.ignore();
+        return;
+    }
 }
 
 void GameController::showDriverBio() const {
@@ -419,82 +552,133 @@ void GameController::showDriverBio() const {
         return;
     }
 
-    std::cout << "\nChoose driver to view bio:\n";
-    for (size_t i = 0; i < driverProfiles.size(); i++) {
-        std::cout << i + 1 << ". " << driverProfiles[i].name << "\n";
+    while (true) {
+        clearConsole();
+
+        setColor(ConsoleColor::Yellow);
+        std::cout << "\n========================= CHOOSE DRIVER BIO =========================\n";
+        resetColor();
+
+        for (size_t i = 0; i < driverProfiles.size(); i++) {
+            setColor(ConsoleColor::Cyan);
+            std::cout << i + 1 << ". ";
+            resetColor();
+
+            setColor(getTeamColor(driverProfiles[i].team));
+            std::cout << driverProfiles[i].name;
+            resetColor();
+
+            std::cout << " (" << driverProfiles[i].team << ")\n";
+        }
+
+        std::cout << "0. Back\n";
+        std::cout << "Enter choice: ";
+
+        int choice = 0;
+        std::cin >> choice;
+        std::cin.ignore();
+
+        if (choice == 0) {
+            return;
+        }
+
+        if (choice < 1 || choice > static_cast<int>(driverProfiles.size())) {
+            std::cout << "Invalid choice.\n";
+            system("pause");
+            continue;
+        }
+
+        clearConsole();
+
+        const auto& d = driverProfiles[choice - 1];
+
+        setColor(getTeamColor(d.team));
+        std::cout << "\n=========================== DRIVER PROFILE ===========================\n";
+        std::cout << d.name << "  (#" << d.number << ")\n";
+        resetColor();
+
+        std::cout << "---------------------------------------------------------------------\n";
+        std::cout << "Team           : " << d.team << "\n";
+        std::cout << "Nationality    : " << d.nationality << "\n";
+        std::cout << "Age            : " << d.age << "\n";
+        std::cout << "Experience     : " << d.experienceYears << " years\n";
+        std::cout << "Car            : " << d.carModel << "\n";
+        std::cout << "Engine         : " << d.engineName << "\n";
+        std::cout << "Tier           : " << getDriverTier(d) << "\n";
+        std::cout << "---------------------------------------------------------------------\n";
+        std::cout << "Skill          : " << d.skill << "\n";
+        std::cout << "Consistency    : " << d.consistency << "\n";
+        std::cout << "Tyre Management: " << d.tyreManagement << "\n";
+        std::cout << "---------------------------------------------------------------------\n";
+        std::cout << "Bio            : " << d.bio << "\n";
+        std::cout << "=====================================================================\n";
+
+        std::cout << "\n0. Back\n";
+        int back = 0;
+        std::cin >> back;
+        std::cin.ignore();
     }
-
-    std::cout << "Enter choice: ";
-    int choice = 0;
-    std::cin >> choice;
-    std::cin.ignore();
-
-    if (choice < 1 || choice > static_cast<int>(driverProfiles.size())) {
-        std::cout << "Invalid choice.\n";
-        return;
-    }
-
-    const auto& d = driverProfiles[choice - 1];
-
-    std::cout << "\n============================== DRIVER PROFILE ==============================\n";
-    std::cout << d.name << "  (#" << d.number << ")\n";
-    std::cout << "---------------------------------------------------------------------------\n";
-    std::cout << "Team           : " << d.team << "\n";
-    std::cout << "Nationality    : " << d.nationality << "\n";
-    std::cout << "Age            : " << d.age << "\n";
-    std::cout << "Experience     : " << d.experienceYears << " years\n";
-    std::cout << "Car            : " << d.carModel << "\n";
-    std::cout << "Engine         : " << d.engineName << "\n";
-    std::cout << "Tier           : " << getDriverTier(d) << "\n";
-    std::cout << "---------------------------------------------------------------------------\n";
-    std::cout << "Skill          : " << d.skill << "\n";
-    std::cout << "Consistency    : " << d.consistency << "\n";
-    std::cout << "Tyre Management: " << d.tyreManagement << "\n";
-    std::cout << "---------------------------------------------------------------------------\n";
-    std::cout << "Bio            : " << d.bio << "\n";
-    std::cout << "===========================================================================\n";
 }
 
 void GameController::chooseRaceType() {
-    int choice = 0;
+    while (true) {
+        clearConsole();
 
-    std::cout << "\nChoose race type:\n";
-    std::cout << "1. Sprint\n";
-    std::cout << "2. Grand Prix\n";
-    std::cout << "3. Custom\n";
-    std::cout << "Enter choice: ";
-    std::cin >> choice;
-    std::cin.ignore();
+        setColor(ConsoleColor::Yellow);
+        std::cout << "\n======================== CHOOSE RACE TYPE ========================\n";
+        resetColor();
 
-    switch (choice) {
-    case 1:
-        selectedRaceType = RaceType::Sprint;
-        std::cout << "Sprint selected.\n";
-        break;
-    case 2:
-        selectedRaceType = RaceType::GrandPrix;
-        std::cout << "Grand Prix selected.\n";
-        break;
-    case 3:
-        selectedRaceType = RaceType::Custom;
-        std::cout << "Enter custom lap count: ";
-        std::cin >> customLapCount;
-        std::cin.ignore();
+        setColor(ConsoleColor::Cyan);
+        std::cout << "1. Sprint\n";
+        std::cout << "2. Grand Prix\n";
+        std::cout << "3. Custom\n";
+        resetColor();
 
-        if (customLapCount <= 0) {
-            customLapCount = 10;
-            std::cout << "Invalid lap count. Default value 10 applied.\n";
+        std::cout << "0. Back\n";
+        std::cout << "Enter choice: ";
+
+        int choice = getValidatedIntInput(0, 3);
+
+        if (choice == 0) {
+            return;
         }
 
-        std::cout << "Custom race selected: " << customLapCount << " laps.\n";
-        break;
-    default:
-        std::cout << "Invalid choice. Grand Prix remains selected.\n";
-        selectedRaceType = RaceType::GrandPrix;
-        break;
+        switch (choice) {
+        case 1:
+            selectedRaceType = RaceType::Sprint;
+            clearConsole();
+            std::cout << "Race type updated: Sprint\n";
+            system("pause");
+            return;
+
+        case 2:
+            selectedRaceType = RaceType::GrandPrix;
+            clearConsole();
+            std::cout << "Race type updated: Grand Prix\n";
+            system("pause");
+            return;
+
+        case 3:
+            selectedRaceType = RaceType::Custom;
+            std::cout << "Enter custom lap count: ";
+            customLapCount = getValidatedIntInput(1, 200);
+
+            if (customLapCount <= 0) {
+                customLapCount = 10;
+            }
+
+            clearConsole();
+            std::cout << "Race type updated: Custom (" << customLapCount << " laps)\n";
+            system("pause");
+            return;
+
+        default:
+            std::cout << "Invalid choice.\n";
+            system("pause");
+            break;
+        }
     }
 }
-
 
 void GameController::run() {
     bool running = true;
@@ -502,13 +686,14 @@ void GameController::run() {
     while (running) {
         showMainMenu();
 
-        int choice = 0;
-        std::cin >> choice;
-        std::cin.ignore();
+        int choice = getValidatedIntInput(1, 5);
 
         switch (choice) {
         case 1:
-            setupTestRace();
+            if (!setupTestRace()) {
+                break;
+            }
+
             start();
 
             while (!isRaceFinished()) {
@@ -518,6 +703,7 @@ void GameController::run() {
 
             printStandings();
             std::cout << "\nRace finished!\n";
+            system("pause");
             break;
 
         case 2:
@@ -534,11 +720,8 @@ void GameController::run() {
 
         case 5:
             running = false;
+            clearConsole();
             std::cout << "Exiting program...\n";
-            break;
-
-        default:
-            std::cout << "Invalid menu choice.\n";
             break;
         }
     }
@@ -631,5 +814,31 @@ void GameController::setupFullGridRace(const Track& selectedTrack) {
 
         race.addParticipant(RaceEntry(driver, car, strategy));
     }
+}
+
+void GameController::printRaceInfoBlock() const {
+    setColor(ConsoleColor::Yellow);
+    std::cout << "============================== RACE INFO ==============================\n";
+    resetColor();
+
+    std::cout << "Track        : " << race.getTrack().getName() << "\n";
+    std::cout << "Race Type    : " << getRaceTypeName() << "\n";
+    std::cout << "Laps         : " << race.getTrack().getLaps() << "\n";
+    std::cout << "Temperature  : " << race.getTrack().getTrackTemperature() << " C\n";
+    std::cout << "Driver       : " << playerDriverName << "\n";
+
+    int playerIndex = findPlayerIndex();
+    if (playerIndex >= 0 && playerIndex < static_cast<int>(race.getParticipants().size())) {
+        std::string mode = race.getParticipants()[playerIndex].getStrategy().getModeName();
+        std::cout << "Mode         : ";
+        setColor(getModeColor(mode));
+        std::cout << mode << "\n";
+        resetColor();
+    }
+    else {
+        std::cout << "Mode         : Unknown\n";
+    }
+
+    std::cout << "=====================================================================\n\n";
 }
 

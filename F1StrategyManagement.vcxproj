@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ConsoleUtils.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="DriverProfile.h" />
     <ClInclude Include="Engine.h" />
@@ -139,6 +140,7 @@
     <ClInclude Include="Tyre.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ConsoleUtils.cpp" />
     <ClCompile Include="Driver.cpp" />
     <ClCompile Include="DriverProfile.cpp" />
     <ClCompile Include="Engine.cpp" />

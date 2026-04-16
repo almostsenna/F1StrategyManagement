@@ -67,6 +67,7 @@ F1-Strategy-Management-Game/
 ├── Strategy.h / Strategy.cpp
 ├── Team.h / Team.cpp
 └── README.md
+```
 Technologies Used
 C++
 Object-Oriented Programming (OOP)

@@ -50,33 +50,44 @@ Lap time is influenced by several factors:
 - selected pace mode;
 - small random variation.
 
-This makes the result depend not only on the driver stats, but also on race strategy.
+This makes the result depend not only on the driver's stats, but also on race strategy.
 
 ---
 
 ## Project Structure
 
 ```text
-F1-Strategy-Management-Game/
+F1StrategyManagement/
 │
-├── main.cpp
-├── Driver.h / Driver.cpp
-├── Tyre.h / Tyre.cpp
-├── Track.h / Track.cpp
-├── Race.h / Race.cpp
-├── Strategy.h / Strategy.cpp
-├── Team.h / Team.cpp
+├── main.cpp                 # Entry point
+│
+├── GameController.*         # Main game flow controller
+├── Race.*                   # Core race simulation
+├── RaceEntry.*              # Driver participation in race
+├── RaceType.h               # Race type definitions
+│
+├── Driver.*                 # Driver logic
+├── DriverProfile.*          # Driver data and stats
+│
+├── F1Car.*                  # Car model
+├── Engine.*                 # Engine characteristics
+├── Tyre.*                   # Tyre system
+│
+├── Track.*                  # Track data and behavior
+├── Strategy.*               # Strategy logic (AI + player modes)
+│
+├── ConsoleUtils.*           # Console output helpers
+│
+├── drivers.csv              # Driver data source
+│
+├── Changelog.md             # Project updates
+├── .gitignore
+├── .gitattributes
+│
+├── F1StrategyManagement.slnx
+├── F1StrategyManagement.vcxproj
 └── README.md
 ```
-Technologies Used
-C++
-Object-Oriented Programming (OOP)
-STL
-Visual Studio
-How to Run
-Open the project in Visual Studio
-Build the solution
-Run the program
 Educational Goals
 
 This project was created to practice:

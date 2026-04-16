@@ -74,7 +74,7 @@ F1StrategyManagement/
 ├── Tyre.*                   # Tyre system
 │
 ├── Track.*                  # Track data and behavior
-├── Strategy.*               # Strategy logic (AI + player modes)
+├── Strategy.*               # Strategy logic (player-controlled pace modes)
 │
 ├── ConsoleUtils.*           # Console output helpers
 │
